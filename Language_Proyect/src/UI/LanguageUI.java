@@ -7,21 +7,49 @@ package UI;
 import java.awt.event.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JFileChooser;
 import language_proyect.*;
 /**
  *
  * @author macas
  */
 public class LanguageUI extends javax.swing.JFrame {
-
+    
+    JFileChooser chooser;
     /**
      * Creates new form LanguageUI
      */
     public LanguageUI() {
         initComponents();
+        
         this.setVisible(true);
     }
+    
+    public String getProgram(){
+        return jTextArea1.getText();
+    }
+    
+    public void setText(String program){
+        jTextArea1.setText(program);
+    }
 
+    public String filePicker(String base)
+    {
+        chooser = new JFileChooser(base);
+        
+        int returnValue = chooser.showOpenDialog(null);
+        
+        if(returnValue == JFileChooser.APPROVE_OPTION)
+        {
+            return chooser.getSelectedFile().getAbsolutePath();
+        }
+        else
+        {
+            
+        }
+        return "";
+    }
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -63,6 +91,11 @@ public class LanguageUI extends javax.swing.JFrame {
         jMenu1.add(jMenuItem1);
 
         jMenuItem2.setText("Open");
+        jMenuItem2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem2ActionPerformed(evt);
+            }
+        });
         jMenu1.add(jMenuItem2);
 
         jMenuBar1.add(jMenu1);
@@ -110,8 +143,13 @@ public class LanguageUI extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem1ActionPerformed
-        // TODO add your handling code here:
+        Language_Proyect.saveFile();
     }//GEN-LAST:event_jMenuItem1ActionPerformed
+
+    private void jMenuItem2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem2ActionPerformed
+        jTextArea1.setText("");
+        Language_Proyect.openFile("./");
+    }//GEN-LAST:event_jMenuItem2ActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
