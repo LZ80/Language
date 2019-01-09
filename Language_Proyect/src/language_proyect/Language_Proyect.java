@@ -4,18 +4,24 @@
  * and open the template in the editor.
  */
 package language_proyect;
-
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.util.*;
+import UI.*;
 /**
  *
  * @author macas
  */
 public class Language_Proyect {
 
+    static LanguageUI gui;
+    
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        // TODO code application logic here
+        gui = new LanguageUI();
+        
     }
     
 }
