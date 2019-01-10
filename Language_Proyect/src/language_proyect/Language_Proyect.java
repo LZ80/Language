@@ -26,6 +26,11 @@ public class Language_Proyect {
     public static void main(String[] args) {
         gui = new LanguageUI();
         
+        
+        String text = null;
+        
+        //Preprocessing
+        preprocessor(text);
     }
     
     public static void saveFile()
@@ -81,4 +86,52 @@ public class Language_Proyect {
         return fileName;
     }
     
+    public static ArrayList<String> preprocessor(String text)
+    {
+        //START!!!!!
+        //eliminating carry returns
+        String temp = "";
+        for(int i=0; i<text.length(); i++)
+        {
+            if(text.charAt(i) != (char)13)
+            {
+                temp += text.charAt(i);
+            }
+        }
+        text = temp;
+        
+        //print(text);
+        
+        //Split by lines
+        String []l = text.split("\n");
+        ArrayList<String> lines = new ArrayList<>();
+        
+        for(int i=0; i<l.length; i++)
+        {
+            lines.add(l[i]);
+        }
+        
+        //replace tabs
+        for(int i=0; i<lines.size(); i++)
+        {
+            lines.set(i, lines.get(i).replaceAll("\\s+", " "));
+        }
+        //print(lines);
+        //trim whitespace
+        
+        for(int i=0; i<lines.size(); i++){
+            lines.set(i, lines.get(i).trim());
+        }
+        
+        //eliminates nulls
+        for(int i=0; i<lines.size(); i++)
+        {
+            if(lines.get(i).equals(null) || lines.get(i).equals(""))
+            {
+                lines.remove(i);
+            }
+        }
+        
+        return lines;
+    }
 }
