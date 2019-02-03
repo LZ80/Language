@@ -11,6 +11,7 @@ import javax.swing.JFileChooser;
 import language_proyect.*;
 import javax.swing.*;
 import javax.swing.tree.*;
+import language_proyect.*;
 /**
  *
  * @author macas
@@ -23,14 +24,14 @@ public class LanguageUI extends javax.swing.JFrame {
      */
     public LanguageUI() {
         initComponents();
-        TreeRender();
         this.setVisible(true);
     }
     
+    DefaultMutableTreeNode root;
+    
     public void TreeRender()
     {
-        //create the root node
-        DefaultMutableTreeNode root = new DefaultMutableTreeNode("Root");
+
         //create the child nodes
         DefaultMutableTreeNode vegetableNode = new DefaultMutableTreeNode("Vegetables");
         DefaultMutableTreeNode fruitNode = new DefaultMutableTreeNode("Fruits");
@@ -55,6 +56,15 @@ public class LanguageUI extends javax.swing.JFrame {
     
     public void setErrorText(String program){
         jTextArea2.setText(program);
+    }
+    
+    public void setPreprocessorText(String text){
+        jTextArea3.setText(text);
+    }
+    
+    public void setRoot(String Name){
+        root = new DefaultMutableTreeNode("Root");
+        TreeRender();
     }
 
     public String filePicker(String base)
@@ -98,6 +108,9 @@ public class LanguageUI extends javax.swing.JFrame {
         jMenuItem2 = new javax.swing.JMenuItem();
         jInternalFrame3 = new javax.swing.JInternalFrame();
         jScrollPane3 = new javax.swing.JScrollPane();
+        jInternalFrame4 = new javax.swing.JInternalFrame();
+        jScrollPane4 = new javax.swing.JScrollPane();
+        jTextArea3 = new javax.swing.JTextArea();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -205,6 +218,26 @@ public class LanguageUI extends javax.swing.JFrame {
 
         jTabbedPane1.addTab("Tree", jInternalFrame3);
 
+        jInternalFrame4.setTitle("Pre-processor");
+        jInternalFrame4.setVisible(true);
+
+        jTextArea3.setColumns(20);
+        jTextArea3.setRows(5);
+        jScrollPane4.setViewportView(jTextArea3);
+
+        javax.swing.GroupLayout jInternalFrame4Layout = new javax.swing.GroupLayout(jInternalFrame4.getContentPane());
+        jInternalFrame4.getContentPane().setLayout(jInternalFrame4Layout);
+        jInternalFrame4Layout.setHorizontalGroup(
+            jInternalFrame4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jScrollPane4, javax.swing.GroupLayout.DEFAULT_SIZE, 544, Short.MAX_VALUE)
+        );
+        jInternalFrame4Layout.setVerticalGroup(
+            jInternalFrame4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jScrollPane4, javax.swing.GroupLayout.DEFAULT_SIZE, 532, Short.MAX_VALUE)
+        );
+
+        jTabbedPane1.addTab("Pre.Proces.", jInternalFrame4);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -231,7 +264,7 @@ public class LanguageUI extends javax.swing.JFrame {
     }//GEN-LAST:event_jMenuItem1ActionPerformed
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        // TODO add your handling code here:
+        Language_Proyect.startSim = true;
     }//GEN-LAST:event_jButton1ActionPerformed
 
 
@@ -240,6 +273,7 @@ public class LanguageUI extends javax.swing.JFrame {
     private javax.swing.JInternalFrame jInternalFrame1;
     private javax.swing.JInternalFrame jInternalFrame2;
     private javax.swing.JInternalFrame jInternalFrame3;
+    private javax.swing.JInternalFrame jInternalFrame4;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JMenuItem jMenuItem1;
@@ -247,8 +281,10 @@ public class LanguageUI extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
+    private javax.swing.JScrollPane jScrollPane4;
     private javax.swing.JTabbedPane jTabbedPane1;
     private javax.swing.JTextArea jTextArea1;
     private javax.swing.JTextArea jTextArea2;
+    private javax.swing.JTextArea jTextArea3;
     // End of variables declaration//GEN-END:variables
 }

@@ -3,430 +3,24 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package language_proyect;
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.util.*;
-import UI.*;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
+package lex;
+
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.nio.file.*;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import lex.Token;
-import lex.Tree;
+import lex.Tree.Node;
+import language_proyect.Language_Proyect;
+import UI.LanguageUI;
+
 /**
  *
- * @author macas
+ * @author Arkai Ariza
  */
-public class Language_Proyect {
-
-    public static LanguageUI gui;
-    static String fileName = "";
+public class Lex {
     
-    public static boolean startSim;
-    
-    public static void initializeVariables(){
-        startSim = false;
-    }
-    
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String[] args) {
-        gui = new LanguageUI();
-        
-        while(true){
-            runProgram();
-        }
-    }
-    
-    public static void runProgram(){
-        initializeVariables();
-        while(!startSim){
-            try {
-                Thread.sleep(200);
-            } catch (InterruptedException ex) {
-                Logger.getLogger(Language_Proyect.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-        
-        String text = gui.getProgram();
-        //Preprocessing
-        ArrayList<String> lines = preprocessor(text);
-        //Lexical Analysis
-        ArrayList<LexLine> lexLines = lexicalAnalyser(lines);
-        
-        
-        String initProgram = gui.getProgram();
-        String Preprocessor = preprocessorShow(initProgram);
-        gui.setPreprocessorText(Preprocessor);
-        runLex(Preprocessor);
-    }
-    
-    public static void runLex(String initProgram){
-        String file = initProgram;
-        myTokens = lex(file);
-        
-        System.out.println(file);
-        /*for(char x : file.toCharArray())
-        {
-            System.out.println((int)(x));
-        }*/
-        for (Token tok : myTokens) {
-            System.out.println(tok);
-        }
-        
-        makeTree();
-        printTree(sTree.root, 0, 1);
-    }
-    
-    
-    
-    public static void saveFile()
-    {
-        fileName = pickFileName("./");
-        if(fileName == "")
-        {
-            fileName = pickFileName("./");
-        }
-        
-        String text = gui.getProgram();
-        
-        try
-        {
-            BufferedWriter writer = new BufferedWriter(new FileWriter(fileName));
-            writer.write(text);
-            writer.close();
-        }
-        catch(Exception e)
-        {
-            
-        }
-        
-    }
-    
-    public static void openFile(String base)
-    {
-        File file = new File(pickFileName(base));
-        
-        String text = "";
-        
-        Scanner scanner = null;
-        try
-        {
-            scanner = new Scanner(file);
-            scanner.useDelimiter("\\Z");
-            text = scanner.next();
-        }
-        catch(Exception e)
-        {
-            
-        }
-        
-        gui.setText(text);
-    }
-    
-    public static String pickFileName(String base)
-    {   
-        fileName = "";
-        fileName = gui.filePicker(base);
-        System.out.println(fileName);
-        
-        return fileName;
-    }
-    
-    public static ArrayList<String> preprocessor(String text)
-    {
-        //START!!!!!
-        //eliminating carry returns
-        String temp = "";
-        for(int i=0; i<text.length(); i++)
-        {
-            if(text.charAt(i) != (char)13)
-            {
-                temp += text.charAt(i);
-            }
-        }
-        text = temp;
-        
-        //print(text);
-        
-        //Split by lines
-        String []l = text.split("\n");
-        ArrayList<String> lines = new ArrayList<>();
-        
-        for(int i=0; i<l.length; i++)
-        {
-            lines.add(l[i]);
-        }
-        
-        //replace tabs
-        for(int i=0; i<lines.size(); i++)
-        {
-            lines.set(i, lines.get(i).replaceAll("\\s+", " "));
-        }
-        //print(lines);
-        //trim whitespace
-        
-        for(int i=0; i<lines.size(); i++){
-            lines.set(i, lines.get(i).trim());
-        }
-        
-        //eliminates nulls
-        for(int i=0; i<lines.size(); i++)
-        {
-            if(lines.get(i).equals(null) || lines.get(i).equals(""))
-            {
-                lines.remove(i);
-            }
-        }
-        
-        return lines;
-    }
-    
-    static class LexPair{
-        public String type;
-        public String token;
-        
-        LexPair(String type, String token)
-        {
-            this.type = type;
-            this.token = token;
-        }
-        
-        @Override
-        public String toString()
-        {
-            return "<" + this.type + "," + this.token + ">";
-        }
-    }
-    
-    static class LexLine{
-        public ArrayList<LexPair> tokens;
-        
-        LexLine(ArrayList<LexPair> tokens)
-        {
-            this.tokens = tokens;
-        }
-        
-        @Override
-        public String toString()
-        {
-            String s = "";
-            for(int i=0; i<this.tokens.size(); i++)
-            {
-                s.concat(this.tokens.get(i).toString());
-            }
-            return s;
-        }
-    }
-    
-    public static ArrayList<LexLine> lexicalAnalyser(ArrayList<String> lines)
-    {
-        
-        ArrayList<LexLine> lexLines = new ArrayList();
-        for(int i=0; i<lines.size(); i++)
-        {
-            String line = lines.get(i);
-            int iword=0;
-            int fword = 0;
-            
-            ArrayList<LexPair> lexic = new ArrayList();
-            
-            while(iword < line.length())
-            {
-                
-                while(iword < line.length())
-                {
-                    char iw = line.charAt(iword);
-                    if(isOperator(iw)){
-                        lexic.add(new LexPair("operator", String.valueOf(iw)));
-                        iword++;
-                    }else if(isSymbol(iw)){
-                        lexic.add(new LexPair("symbol", String.valueOf(iw)));
-                        iword++;
-                    }else if(iw == ' '){
-                        iword++;
-                    }else{
-                        break;
-                    }
-                }
-                if(iword >= line.length())
-                {
-                    break;
-                }
-                fword = iword;
-                
-                while(fword < line.length() && !isOperator(line.charAt(fword)) && !isSymbol(line.charAt(fword)) && line.charAt(fword) != ' ')
-                {
-                    System.out.println(line.charAt(fword));
-                    fword++;
-                }
-                String word = line.substring(iword, fword);
-                String result = wordAnalyzer(word);
-                
-                if(result.equals("error"))
-                {
-                    System.out.println("ERROR!!!!!!! " + word);
-                }
-                else
-                {
-                    lexic.add(new LexPair(result, word));
-                    System.out.println("GOOD");
-                }
-                iword = fword;
-            }
-            System.out.println(lexic);
-            lexLines.add(new LexLine(lexic));
-        }
-        
-        return lexLines;
-    }
-    
-    public static String wordAnalyzer(String word)
-    {
-        String[] keywords = new String[]{"int", "while", "if"};
-        
-        for (int i = 0; i < keywords.length; i++) {
-            if(word.equals(keywords[i]))
-            {
-                return "keyword";
-            }
-        }
-        
-        if(word.matches("\\d+"))
-        {
-            return "number";
-        }
-        else if(word.matches("\\w+"))
-        {
-            return "identifier";
-        }
-        else
-        {
-            return "error";
-        }
-    }
-    
-    public static boolean isOperator(char c)
-    {
-        int[] operators = new int[]{33,37,38,42,43,45,47,60,61,62,124};
-        
-        for(int o: operators)
-        {
-            if((char)o == c)
-            {
-                return true;
-            }
-        }
-        return false;
-    }
-    
-    public static boolean isSymbol(char c)
-    {
-        int[] symbols = new int[]{35,40,41,44,46,59,91,93,123,125}; 
-        
-        for(int o: symbols)
-        {
-            if((char)o == c)
-            {
-                return true;
-            }
-        }
-        return false;
-    }
-    
-    public static String preprocessorShow(String initProgram){
-        String inputtxt = initProgram; //input text
-        String outputtxt = ""; //Output text 
-        String temptxt = "";
-        List<String> lines;
-        int size;
-
-        /*try {
-
-            FileReader fr = new FileReader("rawText.txt");
-            BufferedReader br = new BufferedReader(fr);
-
-            String st;
-
-            while ((st = br.readLine()) != null) {
-                inputtxt = inputtxt + st + '\n';
-            }
-
-            fr.close();
-
-        } catch (IOException e) {
-
-            e.printStackTrace();
-
-        }*/
-        
-        inputtxt = inputtxt.replaceAll("#(\t|\r|.|\n)*?#", "");
-        inputtxt = inputtxt.replaceAll(";",";\n");
-        String[] linesArray = inputtxt.split("[\n]"); //divide el imput en lineas
-        lines = new LinkedList<String>(Arrays.asList(linesArray));;  //pasa las lineas a una lista
-
-        size = lines.size();
-        
-        for(int i = 0; i<linesArray.length;i++){
-            System.out.println(linesArray[i] + i);
-        }
-        
-        for (int i = 0; i < lines.size(); i++) {
-            temptxt = lines.get(i);
-            temptxt = temptxt.replaceAll("\t", " ");
-            temptxt = temptxt.trim();
-            for (int j = 1; j < temptxt.length()-1; j++) {
-                if ((temptxt.charAt(j-1) == '/' && temptxt.charAt(j) == '/')) {
-                    temptxt = temptxt.substring(0, j-1);
-                    break;
-                }
-            }
-            lines.set(i, temptxt);
-        }
-
-        int count = 0;
-        boolean cond = false;
-
-        count = 0;
-
-        while (count != lines.size()) {
-            if (lines.get(count).equals("")) {
-                lines.remove(count);
-                count = 0;
-            } else {
-                count++;
-            }
-        }
-
-        size = lines.size();
-
-        for (int i = 0; i < size; i++) {
-            temptxt = lines.get(i);
-
-            for (int j = 0; j < temptxt.length(); j++) {
-                if ((temptxt.charAt(j) == ' ' && temptxt.charAt(j + 1) == ' ')) {
-                    temptxt = temptxt.substring(0, j) + temptxt.substring(j + 1);
-                    j = 0;
-                }
-            }
-
-            if (!(temptxt.equals(""))) {
-                outputtxt = outputtxt + temptxt + "\n";
-            }
-        }
-
-        return outputtxt;
-    }
-
-
     public static Tree<Token> sTree;
     public static ArrayList<Token> myTokens;
     public static Iterator<Token> iToken;
@@ -492,10 +86,9 @@ public class Language_Proyect {
         }
     }
     
-    public static Tree.Node<Token> program()
+    public static Node<Token> program()
     {
-        Tree.Node<Token> node = getNode(Tree.Node.NodeType.programNode);
-        gui.setRoot(node.nodeType.toString());
+        Node<Token> node = getNode(Node.NodeType.programNode);
         
         currentToken = iToken.next();
         //System.out.println(currentToken);
@@ -526,9 +119,9 @@ public class Language_Proyect {
         }
     }
     
-    public static Tree.Node<Token> block()
+    public static Node<Token> block()
     {
-        Tree.Node<Token> node = getNode(Tree.Node.NodeType.blockNode);
+        Node<Token> node = getNode(Node.NodeType.blockNode);
         
         if(currentToken.type == Token.TokenType.LBRA)
         {   
@@ -558,9 +151,9 @@ public class Language_Proyect {
         return null;
     }
     
-    public static Tree.Node<Token> stats()
+    public static Node<Token> stats()
     {
-        Tree.Node<Token> node = getNode(Tree.Node.NodeType.statsNode);
+        Node<Token> node = getNode(Node.NodeType.statsNode);
         
         node.children.add(stat());
         
@@ -569,9 +162,9 @@ public class Language_Proyect {
         return node;
     }
     
-    public static Tree.Node<Token> stat()
+    public static Node<Token> stat()
     {
-        Tree.Node<Token> node = getNode(Tree.Node.NodeType.statNode);
+        Node<Token> node = getNode(Node.NodeType.statNode);
         
         //System.out.println(currentToken);
         
@@ -598,9 +191,9 @@ public class Language_Proyect {
         return node;
     }
     
-    public static Tree.Node<Token> mStat()
+    public static Node<Token> mStat()
     {
-        Tree.Node<Token> node = getNode(Tree.Node.NodeType.mStatNode);
+        Node<Token> node = getNode(Node.NodeType.mStatNode);
         
         node.children.add(stat());
         if(node.children.get(0).children.isEmpty() && node.children.get(0).data.isEmpty())
@@ -611,12 +204,12 @@ public class Language_Proyect {
         return node;
     }
     
-    public static Tree.Node<Token> ifF()
+    public static Node<Token> ifF()
     {
         
         //if 	(	<expr> 	<LO> 	<expr>	) 	<block>
         
-        Tree.Node node = getNode(Tree.Node.NodeType.ifNode);
+        Node node = getNode(Node.NodeType.ifNode);
         
         if(currentToken.type == Token.TokenType.IF)
         {            
@@ -653,11 +246,11 @@ public class Language_Proyect {
         return null;
     }
     
-    public static Tree.Node<Token> whileF()
+    public static Node<Token> whileF()
     {
         //while 	( 	<expr> 	<LO> 	<expr>	 )	 <block>
         
-        Tree.Node node = getNode(Tree.Node.NodeType.whileNode);
+        Node node = getNode(Node.NodeType.whileNode);
         
         if(currentToken.type == Token.TokenType.WHILE)
         {
@@ -695,10 +288,10 @@ public class Language_Proyect {
         return null;
     }
     
-    public static Tree.Node<Token> assign()
+    public static Node<Token> assign()
     {
         //ID		=	<expr> ;
-        Tree.Node<Token> node = getNode(Tree.Node.NodeType.assignNode);
+        Node<Token> node = getNode(Node.NodeType.assignNode);
         
         if(currentToken.type == Token.TokenType.ID)
         {
@@ -739,9 +332,9 @@ public class Language_Proyect {
         return null;
     }
     
-    public static Tree.Node<Token> declaration()
+    public static Node<Token> declaration()
     {
-        Tree.Node<Token> node = getNode(Tree.Node.NodeType.assignNode);
+        Node<Token> node = getNode(Node.NodeType.assignNode);
         
         if(currentToken.type == Token.TokenType.INTEGER)
         {
@@ -780,10 +373,10 @@ public class Language_Proyect {
         return null;
     } 
     
-    public static Tree.Node<Token> expr(){
+    public static Node<Token> expr(){
         //<expr>    --> 	<T> * <expr> | <T> / <expr> | <T>
         
-        Tree.Node<Token> node = getNode(Tree.Node.NodeType.exprNode);
+        Node<Token> node = getNode(Node.NodeType.exprNode);
         
         node.children.add(t());
         
@@ -803,9 +396,9 @@ public class Language_Proyect {
         return node;
     }
     
-    public static Tree.Node<Token> lOperator(){
+    public static Node<Token> lOperator(){
         
-        Tree.Node<Token> node = getNode(Tree.Node.NodeType.loNode);
+        Node<Token> node = getNode(Node.NodeType.loNode);
         
         switch(currentToken.type)
         {
@@ -843,10 +436,10 @@ public class Language_Proyect {
         return node;
     }
     
-    public static Tree.Node<Token> t(){
+    public static Node<Token> t(){
         //<F> 	+	 <T>	 |	 <F>	 -	 <T>	 |	 <F>
         
-        Tree.Node<Token> node = getNode(Tree.Node.NodeType.tNode);
+        Node<Token> node = getNode(Node.NodeType.tNode);
         
         node.children.add(f());
         
@@ -867,10 +460,10 @@ public class Language_Proyect {
         return node;
     }
     
-    public static Tree.Node<Token> f(){
+    public static Node<Token> f(){
         //( <expr> ) 	|	 ID	 |	 NUMBER
         
-        Tree.Node<Token> node = getNode(Tree.Node.NodeType.fNode);
+        Node<Token> node = getNode(Node.NodeType.fNode);
         
         if(currentToken.type == Token.TokenType.LPAREN)
         {
@@ -906,13 +499,13 @@ public class Language_Proyect {
         return node;
     }
     
-    public static Tree.Node<Token> getNode(Tree.Node.NodeType nodeType)
+    public static Node<Token> getNode(Node.NodeType nodeType)
     {
         //System.out.println(nodeType);
-        return new Tree.Node<Token>(nodeType);
+        return new Node<Token>(nodeType);
     }
     
-    public static void printTree(Tree.Node<Token> node, int t, int s){
+    public static void printTree(Node<Token> node, int t, int s){
         
         for(int i=0; i<=t; i++){
             System.out.print("\t");
@@ -936,7 +529,7 @@ public class Language_Proyect {
         
         if(!node.children.isEmpty())
         {
-            for(Tree.Node<Token> nd : node.children)
+            for(Node<Token> nd : node.children)
            {
                printTree(nd, t,1);
            }
