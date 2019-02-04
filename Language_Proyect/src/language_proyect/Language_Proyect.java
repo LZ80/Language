@@ -31,7 +31,7 @@ public class Language_Proyect {
     static String fileName = "";
     
     public static boolean startSim;
-    
+    public static String initProgram;
     public static void initializeVariables(){
         startSim = false;
     }
@@ -56,7 +56,6 @@ public class Language_Proyect {
                 Logger.getLogger(Language_Proyect.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-        
         String text = gui.getProgram();
         //Preprocessing
         ArrayList<String> lines = preprocessor(text);
@@ -64,9 +63,10 @@ public class Language_Proyect {
         ArrayList<LexLine> lexLines = lexicalAnalyser(lines);
         
         
-        String initProgram = gui.getProgram();
+        initProgram = gui.getProgram();
         String Preprocessor = preprocessorShow(initProgram);
         gui.setPreprocessorText(Preprocessor);
+        //System.out.println("Preprocessor: \n"+Preprocessor+"Fin Preprocesador");
         runLex(Preprocessor);
     }
     
@@ -86,6 +86,7 @@ public class Language_Proyect {
         makeTree();
         printTree(sTree.root, 0, 1);
         makeUITree(sTree.root);
+        gui.setErrorText("");
     }
     
     
@@ -490,7 +491,7 @@ public class Language_Proyect {
         }
         else
         {
-            System.exit(1);
+            gui.setErrorText("ERROR at Parsing Tree.");
         }
     }
     
@@ -509,10 +510,11 @@ public class Language_Proyect {
         else
         {
             System.out.printf("ERROR. Expected 'Begin Token' in line %d\n", currentToken.line);
-            System.exit(1);
+            gui.setErrorText("ERROR. Expected 'Begin Token ' at line "+currentToken.line+"\n");
+            gui.setText("");
+            runProgram();            
         }
-        Node<Token> tempNode = block();
-        node.children.add(tempNode);
+        node.children.add(block());
         //gui.addToNode(node.nodeType.toString(), tempNode.nodeType.toString());
         
         if(currentToken.type == Token.TokenType.RETURN)
@@ -524,7 +526,8 @@ public class Language_Proyect {
         else
         {
             System.out.printf("ERROR. Expected 'Return Token' in line %d\n", currentToken.line);            
-            System.exit(1);
+            gui.setErrorText("ERROR. Expected 'Return Token ' at line "+currentToken.line+"\n");
+            
             return null;
         }
     }
@@ -532,13 +535,11 @@ public class Language_Proyect {
     public static Node<Token> block()
     {
         Node<Token> node = getNode(Node.NodeType.blockNode);
-        
         if(currentToken.type == Token.TokenType.LBRA)
         {   
             currentToken = iToken.next();
             //System.out.println(currentToken);
-            Node<Token> tempStatNode = stats();
-            node.children.add(tempStatNode);
+            node.children.add(stats());
             //gui.addToNode(node.nodeType.toString(), tempStatNode.nodeType.toString());
             //System.out.println(currentToken + "block");
             
@@ -551,14 +552,16 @@ public class Language_Proyect {
             else
             {
                 System.out.printf("ERROR. Expected '} Token' in line %d\n", currentToken.line);
-                System.exit(1);
+                gui.setErrorText("ERROR. Expected '} Token ' at line "+currentToken.line+"\n");
+                runProgram();
                 return null;
             }
         }
         else
         {
             System.out.printf("ERROR. Expected '{ Token' in line %d\n", currentToken.line);
-            System.exit(1);
+            gui.setErrorText("ERROR. Expected '{ Token ' at line "+currentToken.line+"\n");
+            runProgram();
         }
         return null;
     }
@@ -635,7 +638,8 @@ public class Language_Proyect {
             else
             {
                 System.out.printf("ERROR. Expected '( token' at line %d", currentToken.line);
-                System.exit(1);
+                gui.setErrorText("ERROR. Expected '( Token ' at line "+currentToken.line+"\n");
+                runProgram();
             }
 
                 node.children.add(expr());
@@ -650,7 +654,9 @@ public class Language_Proyect {
             else
             {
                 System.out.printf("ERROR. Expected ') token' at line %d", currentToken.line);
-                System.exit(1);
+                gui.setErrorText("ERROR. Expected ') Token ' at line "+currentToken.line+"\n");
+                runProgram();
+                
             }
             node.children.add(block());
             return node;
@@ -677,7 +683,9 @@ public class Language_Proyect {
             else
             {
                 System.out.printf("ERROR. Expected '( token' at line %d", currentToken.line);
-                System.exit(1);
+                gui.setErrorText("ERROR. Expected '( Token ' at line "+currentToken.line+"\n");
+                runProgram();
+                
             }
 
             node.children.add(expr());
@@ -692,7 +700,9 @@ public class Language_Proyect {
             else
             {
                 System.out.printf("ERROR. Expected ') token' at line %d", currentToken.line);
-                System.exit(1);
+                gui.setErrorText("ERROR. Expected ') Token ' at line "+currentToken.line+"\n");
+                runProgram();
+                
             }
             node.children.add(block());
             return node;
@@ -719,7 +729,8 @@ public class Language_Proyect {
             else
             {
                 System.out.printf("ERROR. Expected '= Token' at line %d", currentToken.line);
-                System.exit(1);
+                gui.setErrorText("ERROR. Expected '= Token ' at line "+currentToken.line+"\n");
+                runProgram();
             }
             
             node.children.add(expr());
@@ -732,21 +743,23 @@ public class Language_Proyect {
             else
             {
                 System.out.printf("ERROR. Expected '; Token' at line %d", currentToken.line);
-                System.exit(1);
+                gui.setErrorText("ERROR. Expected '; Token ' at line "+currentToken.line+"\n");
+                runProgram();
             }
             return node;
         }
         else
         {
             System.out.printf("ERROR. Expected 'ID Token' at line %d", currentToken.line);
-            System.exit(1);
+            gui.setErrorText("ERROR. Expected 'ID Token ' at line "+currentToken.line+"\n");
+            runProgram();
         }
         return null;
     }
     
     public static Node<Token> declaration()
     {
-        Node<Token> node = getNode(Node.NodeType.assignNode);
+        Node<Token> node = getNode(Node.NodeType.declarationNode);
         
         if(currentToken.type == Token.TokenType.INTEGER)
         {
@@ -762,7 +775,9 @@ public class Language_Proyect {
             else
             {
                 System.out.printf("ERROR. Expected 'ID Token' at line %d", currentToken.line);
-                System.exit(1);
+                gui.setErrorText("ERROR. Expected 'ID Token ' at line "+currentToken.line+"\n");
+                runProgram();
+                
             }
                         
             if(currentToken.type == Token.TokenType.SEMICOLON)
@@ -773,14 +788,18 @@ public class Language_Proyect {
             else
             {
                 System.out.printf("ERROR. Expected '; Token' at line %d", currentToken.line);
-                System.exit(1);
+                gui.setErrorText("ERROR. Expected '; Token ' at line "+currentToken.line+"\n");
+                runProgram();
+                
             }
             return node;
         }
         else
         {
             System.out.printf("ERROR. Expected 'INTEGER Token' at line %d", currentToken.line);
-            System.exit(1);
+            gui.setErrorText("ERROR. Expected 'INTEGER Token ' at line "+currentToken.line+"\n");
+            runProgram();
+            
         }
         return null;
     } 
@@ -892,7 +911,9 @@ public class Language_Proyect {
             else
             {
                 System.out.printf("ERROR. Expected ') Token' at line %d", currentToken.line);
-                System.exit(1);
+                gui.setErrorText("ERROR. Expected ') Token ' at line "+currentToken.line+"\n");
+                runProgram();
+                
             }
         }
         else if(currentToken.type == Token.TokenType.ID)
@@ -960,7 +981,6 @@ public class Language_Proyect {
            for(Token tk : node.data)
            {
                gui.addToNode(node.nodeType.toString(), tk.data.toString());
-               System.out.println(tk);
            }
         }
         
