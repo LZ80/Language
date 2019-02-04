@@ -20,6 +20,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import lex.Token;
 import lex.Tree;
+import lex.Tree.*;
 /**
  *
  * @author macas
@@ -84,6 +85,7 @@ public class Language_Proyect {
         
         makeTree();
         printTree(sTree.root, 0, 1);
+        makeUITree(sTree.root);
     }
     
     
@@ -427,10 +429,10 @@ public class Language_Proyect {
     }
 
 
-    public static Tree<Token> sTree;
-    public static ArrayList<Token> myTokens;
-    public static Iterator<Token> iToken;
-    public static Token currentToken;
+    static Tree<Token> sTree;
+    static ArrayList<Token> myTokens;
+    static Iterator<Token> iToken;
+    static Token currentToken;
     
     public static ArrayList<Token> lex(String input) {
         int line = 1;
@@ -492,9 +494,9 @@ public class Language_Proyect {
         }
     }
     
-    public static Tree.Node<Token> program()
+    public static Node<Token> program()
     {
-        Tree.Node<Token> node = getNode(Tree.Node.NodeType.programNode);
+        Node<Token> node = getNode(Node.NodeType.programNode);
         gui.setRoot(node.nodeType.toString());
         
         currentToken = iToken.next();
@@ -509,8 +511,9 @@ public class Language_Proyect {
             System.out.printf("ERROR. Expected 'Begin Token' in line %d\n", currentToken.line);
             System.exit(1);
         }
-        
-        node.children.add(block());
+        Node<Token> tempNode = block();
+        node.children.add(tempNode);
+        //gui.addToNode(node.nodeType.toString(), tempNode.nodeType.toString());
         
         if(currentToken.type == Token.TokenType.RETURN)
         {
@@ -526,15 +529,17 @@ public class Language_Proyect {
         }
     }
     
-    public static Tree.Node<Token> block()
+    public static Node<Token> block()
     {
-        Tree.Node<Token> node = getNode(Tree.Node.NodeType.blockNode);
+        Node<Token> node = getNode(Node.NodeType.blockNode);
         
         if(currentToken.type == Token.TokenType.LBRA)
         {   
             currentToken = iToken.next();
             //System.out.println(currentToken);
-            node.children.add(stats());
+            Node<Token> tempStatNode = stats();
+            node.children.add(tempStatNode);
+            //gui.addToNode(node.nodeType.toString(), tempStatNode.nodeType.toString());
             //System.out.println(currentToken + "block");
             
             if(currentToken.type == Token.TokenType.RBRA)
@@ -558,9 +563,9 @@ public class Language_Proyect {
         return null;
     }
     
-    public static Tree.Node<Token> stats()
+    public static Node<Token> stats()
     {
-        Tree.Node<Token> node = getNode(Tree.Node.NodeType.statsNode);
+        Node<Token> node = getNode(Node.NodeType.statsNode);
         
         node.children.add(stat());
         
@@ -569,9 +574,9 @@ public class Language_Proyect {
         return node;
     }
     
-    public static Tree.Node<Token> stat()
+    public static Node<Token> stat()
     {
-        Tree.Node<Token> node = getNode(Tree.Node.NodeType.statNode);
+        Node<Token> node = getNode(Node.NodeType.statNode);
         
         //System.out.println(currentToken);
         
@@ -598,9 +603,9 @@ public class Language_Proyect {
         return node;
     }
     
-    public static Tree.Node<Token> mStat()
+    public static Node<Token> mStat()
     {
-        Tree.Node<Token> node = getNode(Tree.Node.NodeType.mStatNode);
+        Node<Token> node = getNode(Node.NodeType.mStatNode);
         
         node.children.add(stat());
         if(node.children.get(0).children.isEmpty() && node.children.get(0).data.isEmpty())
@@ -611,12 +616,12 @@ public class Language_Proyect {
         return node;
     }
     
-    public static Tree.Node<Token> ifF()
+    public static Node<Token> ifF()
     {
         
         //if 	(	<expr> 	<LO> 	<expr>	) 	<block>
         
-        Tree.Node node = getNode(Tree.Node.NodeType.ifNode);
+        Node node = getNode(Node.NodeType.ifNode);
         
         if(currentToken.type == Token.TokenType.IF)
         {            
@@ -653,11 +658,11 @@ public class Language_Proyect {
         return null;
     }
     
-    public static Tree.Node<Token> whileF()
+    public static Node<Token> whileF()
     {
         //while 	( 	<expr> 	<LO> 	<expr>	 )	 <block>
         
-        Tree.Node node = getNode(Tree.Node.NodeType.whileNode);
+        Node node = getNode(Node.NodeType.whileNode);
         
         if(currentToken.type == Token.TokenType.WHILE)
         {
@@ -695,10 +700,10 @@ public class Language_Proyect {
         return null;
     }
     
-    public static Tree.Node<Token> assign()
+    public static Node<Token> assign()
     {
         //ID		=	<expr> ;
-        Tree.Node<Token> node = getNode(Tree.Node.NodeType.assignNode);
+        Node<Token> node = getNode(Node.NodeType.assignNode);
         
         if(currentToken.type == Token.TokenType.ID)
         {
@@ -739,9 +744,9 @@ public class Language_Proyect {
         return null;
     }
     
-    public static Tree.Node<Token> declaration()
+    public static Node<Token> declaration()
     {
-        Tree.Node<Token> node = getNode(Tree.Node.NodeType.assignNode);
+        Node<Token> node = getNode(Node.NodeType.assignNode);
         
         if(currentToken.type == Token.TokenType.INTEGER)
         {
@@ -780,10 +785,10 @@ public class Language_Proyect {
         return null;
     } 
     
-    public static Tree.Node<Token> expr(){
+    public static Node<Token> expr(){
         //<expr>    --> 	<T> * <expr> | <T> / <expr> | <T>
         
-        Tree.Node<Token> node = getNode(Tree.Node.NodeType.exprNode);
+        Node<Token> node = getNode(Node.NodeType.exprNode);
         
         node.children.add(t());
         
@@ -803,9 +808,9 @@ public class Language_Proyect {
         return node;
     }
     
-    public static Tree.Node<Token> lOperator(){
+    public static Node<Token> lOperator(){
         
-        Tree.Node<Token> node = getNode(Tree.Node.NodeType.loNode);
+        Node<Token> node = getNode(Node.NodeType.loNode);
         
         switch(currentToken.type)
         {
@@ -843,10 +848,10 @@ public class Language_Proyect {
         return node;
     }
     
-    public static Tree.Node<Token> t(){
+    public static Node<Token> t(){
         //<F> 	+	 <T>	 |	 <F>	 -	 <T>	 |	 <F>
         
-        Tree.Node<Token> node = getNode(Tree.Node.NodeType.tNode);
+        Node<Token> node = getNode(Node.NodeType.tNode);
         
         node.children.add(f());
         
@@ -867,10 +872,10 @@ public class Language_Proyect {
         return node;
     }
     
-    public static Tree.Node<Token> f(){
+    public static Node<Token> f(){
         //( <expr> ) 	|	 ID	 |	 NUMBER
         
-        Tree.Node<Token> node = getNode(Tree.Node.NodeType.fNode);
+        Node<Token> node = getNode(Node.NodeType.fNode);
         
         if(currentToken.type == Token.TokenType.LPAREN)
         {
@@ -906,13 +911,13 @@ public class Language_Proyect {
         return node;
     }
     
-    public static Tree.Node<Token> getNode(Tree.Node.NodeType nodeType)
+    public static Node<Token> getNode(Node.NodeType nodeType)
     {
         //System.out.println(nodeType);
-        return new Tree.Node<Token>(nodeType);
+        return new Node<Token>(nodeType);
     }
     
-    public static void printTree(Tree.Node<Token> node, int t, int s){
+    public static void printTree(Node<Token> node, int t, int s){
         
         for(int i=0; i<=t; i++){
             System.out.print("\t");
@@ -936,7 +941,7 @@ public class Language_Proyect {
         
         if(!node.children.isEmpty())
         {
-            for(Tree.Node<Token> nd : node.children)
+            for(Node<Token> nd : node.children)
            {
                printTree(nd, t,1);
            }
@@ -946,5 +951,26 @@ public class Language_Proyect {
             System.out.print("\t");
         }
         System.out.println(node.nodeType);
+    }
+    
+    
+    public static void makeUITree(Node<Token> node){
+        if(!node.data.isEmpty())
+        {
+           for(Token tk : node.data)
+           {
+               gui.addToNode(node.nodeType.toString(), tk.data.toString());
+               System.out.println(tk);
+           }
+        }
+        
+        if(!node.children.isEmpty())
+        {
+            for(Node<Token> nd : node.children)
+           {
+               gui.addToNode(node.nodeType.toString(), nd.nodeType.toString());
+               makeUITree(nd);
+           }
+        }
     }
 }

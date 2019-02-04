@@ -5,6 +5,7 @@
  */
 package UI;
 import java.awt.event.*;
+import java.util.Enumeration;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFileChooser;
@@ -30,15 +31,7 @@ public class LanguageUI extends javax.swing.JFrame {
     DefaultMutableTreeNode root;
     
     public void TreeRender()
-    {
-
-        //create the child nodes
-        DefaultMutableTreeNode vegetableNode = new DefaultMutableTreeNode("Vegetables");
-        DefaultMutableTreeNode fruitNode = new DefaultMutableTreeNode("Fruits");
-        //add the child nodes to the root node
-        root.add(vegetableNode);
-        root.add(fruitNode);
-         
+    {    
         //create the tree by passing in the root node
         tree = new JTree(root);
         jScrollPane3.setViewportView(tree);
@@ -63,7 +56,25 @@ public class LanguageUI extends javax.swing.JFrame {
     }
     
     public void setRoot(String Name){
-        root = new DefaultMutableTreeNode("Root");
+        root = new DefaultMutableTreeNode(Name);
+        TreeRender();
+    }
+    
+    public DefaultMutableTreeNode searchNode(String nodeStr) {
+        DefaultMutableTreeNode node = null;
+        Enumeration e = root.breadthFirstEnumeration();
+        while (e.hasMoreElements()) {
+          node = (DefaultMutableTreeNode) e.nextElement();
+          if (nodeStr.equals(node.getUserObject().toString())) {
+            return node;
+          }
+        }
+        return null;
+    }
+    
+    public void addToNode(String Parent, String Children){
+        DefaultMutableTreeNode ChildrenNode = new DefaultMutableTreeNode(Children);
+        searchNode(Parent).add(ChildrenNode);
         TreeRender();
     }
 
