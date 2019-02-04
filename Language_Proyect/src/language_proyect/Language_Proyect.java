@@ -32,8 +32,17 @@ public class Language_Proyect {
     
     public static boolean startSim;
     public static String initProgram;
+    static Tree<Token> sTree;
+    static ArrayList<Token> myTokens;
+    static Iterator<Token> iToken;
+    static Token currentToken;
+    
     public static void initializeVariables(){
         startSim = false;
+        sTree = null;
+        myTokens = null;
+        iToken = null;
+        currentToken = null;
     }
     
     /**
@@ -86,7 +95,6 @@ public class Language_Proyect {
         makeTree();
         printTree(sTree.root, 0, 1);
         makeUITree(sTree.root);
-        gui.setErrorText("");
     }
     
     
@@ -430,10 +438,7 @@ public class Language_Proyect {
     }
 
 
-    static Tree<Token> sTree;
-    static ArrayList<Token> myTokens;
-    static Iterator<Token> iToken;
-    static Token currentToken;
+    
     
     public static ArrayList<Token> lex(String input) {
         int line = 1;
@@ -511,7 +516,6 @@ public class Language_Proyect {
         {
             System.out.printf("ERROR. Expected 'Begin Token' in line %d\n", currentToken.line);
             gui.setErrorText("ERROR. Expected 'Begin Token ' at line "+currentToken.line+"\n");
-            gui.setText("");
             runProgram();            
         }
         node.children.add(block());
@@ -527,7 +531,6 @@ public class Language_Proyect {
         {
             System.out.printf("ERROR. Expected 'Return Token' in line %d\n", currentToken.line);            
             gui.setErrorText("ERROR. Expected 'Return Token ' at line "+currentToken.line+"\n");
-            
             return null;
         }
     }
@@ -553,7 +556,7 @@ public class Language_Proyect {
             {
                 System.out.printf("ERROR. Expected '} Token' in line %d\n", currentToken.line);
                 gui.setErrorText("ERROR. Expected '} Token ' at line "+currentToken.line+"\n");
-                runProgram();
+                
                 return null;
             }
         }
